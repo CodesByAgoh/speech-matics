@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import speechmatics
 from httpx import HTTPStatusError
-from flask_socketio import SocketIO
 import os
 
 app = Flask(__name__)
