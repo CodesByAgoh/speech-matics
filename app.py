@@ -3,17 +3,15 @@ from flask_cors import CORS
 import speechmatics
 from httpx import HTTPStatusError
 from flask_socketio import SocketIO
+import os
 
 app = Flask(__name__)
 CORS(app, origins=["http://127.0.0.1:5500"])
-socketio = SocketIO(app)
 
-
-API_KEY = "1Wv2I8O8YVeY0ShPMdn4SwxZTdFePTQw"
+API_KEY = os.environ.get('API_KEY')
 PATH_TO_FILE = "temp.wav"
 LANGUAGE = "en"
 CONNECTION_URL = f"wss://eu2.rt.speechmatics.com/v2"
-
 
 @app.route('/audio', methods=['POST'])
 def audio():
@@ -23,7 +21,7 @@ def audio():
     if audio_file:
         audio_file.save(PATH_TO_FILE)
     else:
-        return jsonify({ "message": "No audio rwceived" })
+        return jsonify({ "message": "No audio received" })
 
     # Create a transcription client
     ws = speechmatics.client.WebsocketClient(
@@ -40,8 +38,6 @@ def audio():
     # Define an event handler to print the full transcript
     def print_transcript(msg):
         transcription.append(msg['metadata']['transcript'])
-        def send_transcript():
-            socketio.emit('receive transcript', {'trasncript': transcription[-1]})
         print(f"[   FULL] {msg['metadata']['transcript']}")
 
     # Register the event handler for partial transcript
@@ -85,4 +81,5 @@ def home():
     return render_template('home.html')
 
 if __name__ == '__main__':
-    socketio.run(app)
+    app.secret_key = 'secretkeyforspeechmaticsapiapi'
+    app.run()
